@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polymorphism — Interactive Lesson</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #F7F5F2;
+      --surface: #FFFFFF;
+      --surface2: #F2F0ED;
+      --border: #E2DED8;
+      --text: #1A1A2E;
+      --muted: #6B6877;
+      --accent: #5B4FCF;
+      --accent-light: #EEF0FF;
+      --accent-mid: #8B82E0;
+      --green: #1A7F5A;
+      --green-light: #E6F5EF;
+      --amber: #B45309;
+      --amber-light: #FEF3C7;
+      --red: #B91C1C;
+      --red-light: #FEE2E2;
+      --tag-bg: #EEEDF5;
+      --tag-text: #4338CA;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 20px 60px;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 40px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent-mid) 100%);
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-light);
+      color: var(--tag-text);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 420px;
+      line-height: 1.65;
+    }
+
+    .header-visual {
+      width: 90px;
+      height: 90px;
+      background: var(--accent-light);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .header-visual svg {
+      width: 48px;
+      height: 48px;
+    }
+
+    /* ── PROGRESS ── */
+    .progress-wrap {
+      margin-bottom: 28px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .progress-track {
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .slide-dots {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.3s, transform 0.2s;
+      cursor: pointer;
+    }
+
+    .dot.active {
+      background: var(--accent);
+      transform: scale(1.3);
+    }
+
+    .dot.done {
+      background: var(--accent-mid);
+    }
+
+    /* ── SLIDES ── */
+    .slide {
+      display: none;
+      animation: rise 0.35s ease;
+    }
+
+    .slide.visible {
+      display: block;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 36px;
+      margin-bottom: 16px;
+    }
+
+    .card+.card {
+      margin-top: 0;
+    }
+
+    .slide-tag {
+      display: inline-block;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+
+    .slide-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(20px, 3.5vw, 28px);
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+      line-height: 1.25;
+    }
+
+    .body-text {
+      font-size: 15.5px;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 14px;
+    }
+
+    .body-text strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .body-text em {
+      color: var(--accent);
+      font-style: normal;
+      font-weight: 500;
+    }
+
+    /* ── CALLOUT ── */
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: var(--accent-light);
+      border-radius: 0 12px 12px 0;
+      padding: 16px 20px;
+      margin: 18px 0;
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .callout strong {
+      color: var(--accent);
+    }
+
+    /* ── TYPE CARDS ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 540px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .type-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .type-card .tc-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      color: var(--muted);
+    }
+
+    .type-card .tc-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .type-card .tc-body {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .tc-compile {
+      border-top: 3px solid var(--amber);
+    }
+
+    .tc-runtime {
+      border-top: 3px solid var(--accent);
+    }
+
+    /* ── CODE BLOCK ── */
+    .code-wrap {
+      background: #1E1E2E;
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: #16162A;
+      border-bottom: 1px solid #2D2D45;
+    }
+
+    .code-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .code-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .cd1 {
+      background: #FF5F57;
+    }
+
+    .cd2 {
+      background: #FFBD2E;
+    }
+
+    .cd3 {
+      background: #28C840;
+    }
+
+    .code-filename {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: #6E6E8A;
+      margin-left: 4px;
+    }
+
+    .code-body {
+      padding: 20px;
+      font-family: 'DM Mono', monospace;
+      line-height: 1.8;
+      color: #CDD6F4;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .kw {
+      color: #CBA6F7;
+    }
+
+    .cls {
+      color: #89DCEB;
+    }
+
+    .fn {
+      color: #89B4FA;
+    }
+
+    .cm {
+      color: #6C7086;
+      font-style: italic;
+    }
+
+    .str {
+      color: #A6E3A1;
+    }
+
+    .num {
+      color: #FAB387;
+    }
+
+    /* ── ANALOGY BOX ── */
+    .analogy {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin: 18px 0;
+    }
+
+    .analogy-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+      line-height: 1;
+      margin-top: 2px;
+    }
+
+    .analogy-body {
+      font-size: 14.5px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .analogy-body strong {
+      color: var(--text);
+    }
+
+    /* ── EXAMPLE GRID ── */
+    .example-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .eg-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 16px;
+      background: var(--surface);
+    }
+
+    .eg-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .eg-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .eg-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* ── INTERACTIVE DEMO ── */
+    .demo-wrap {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .demo-topbar {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .demo-topbar-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-mid);
+      border-radius: 50%;
+    }
+
+    .demo-inner {
+      padding: 20px;
+    }
+
+    .toggle-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .toggle-btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.18s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .toggle-btn.on {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .output-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .output-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 0 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .output-table td {
+      padding: 9px 0;
+      border-bottom: 1px solid var(--surface2);
+      color: var(--muted);
+      vertical-align: middle;
+    }
+
+    .output-table td:first-child {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .output-table td .formula {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .output-table td .result {
+      font-family: 'DM Mono', monospace;
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    .output-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* ── QUIZ ── */
+    .quiz-question {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .q-btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 13px 18px;
+      font-size: 14.5px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      color: var(--text);
+      text-align: left;
+      transition: all 0.18s;
+      font-weight: 400;
+    }
+
+    .q-btn:hover:not(:disabled) {
+      background: var(--accent-light);
+      border-color: var(--accent);
+    }
+
+    .q-btn.correct {
+      background: var(--green-light);
+      border-color: var(--green);
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    .q-btn.wrong {
+      background: var(--red-light);
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .quiz-feedback {
+      font-size: 14px;
+      padding: 11px 16px;
+      border-radius: 10px;
+      display: none;
+      line-height: 1.6;
+    }
+
+    .quiz-feedback.show {
+      display: block;
+    }
+
+    .quiz-feedback.good {
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    .quiz-feedback.bad {
+      background: var(--red-light);
+      color: var(--red);
+    }
+
+    /* ── QUIZ SEPARATOR ── */
+    .q-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 28px 0;
+    }
+
+    /* ── SUMMARY ── */
+    .summary-box {
+      background: var(--text);
+      color: #fff;
+      border-radius: 16px;
+      padding: 32px 36px;
+      margin-bottom: 16px;
+    }
+
+    .summary-box h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      margin-bottom: 18px;
+      opacity: 0.95;
+    }
+
+    .summary-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 14.5px;
+      line-height: 1.6;
+      opacity: 0.85;
+    }
+
+    .summary-item::before {
+      content: '→';
+      color: var(--accent-mid);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .nav-info {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .nav-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 9px 20px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--text);
+      transition: background 0.18s;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: var(--surface2);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .nav-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .nav-btn.primary:hover:not(:disabled) {
+      background: #4940B8;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <!--
+Polymorphism Interactive Lesson
+Created by Haeytham Almalak
+© 2026 All Rights Reserved
+-->
+    <!-- HEADER -->
+    <div class="header">
+      <div>
+        <div class="header-badge">CS Fundamentals · OOP Series</div>
+        <h1>Polymorphism</h1>
+        <p>Today I'll explain what polymorphism is, how it works, and why it matters in real software systems.</p>
+      </div>
+      <div class="header-visual">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="28" width="12" height="12" rx="3" fill="#5B4FCF" opacity="0.85" />
+          <rect x="18" y="20" width="12" height="20" rx="3" fill="#8B82E0" opacity="0.75" />
+          <rect x="32" y="12" width="12" height="28" rx="3" fill="#C4BFEE" opacity="0.65" />
+          <path d="M10 28 L24 20 L38 12" stroke="#5B4FCF" stroke-width="1.5" stroke-dasharray="3 2" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="prog-label">Section 1 of 7</span>
+        <span id="prog-pct">14%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-fill" style="width:14%"></div>
+      </div>
+      <div class="slide-dots" id="dots"></div>
+    </div>
+
+    <!-- ── SLIDE 0: What is it ── -->
+    <div class="slide visible" id="s0">
+      <div class="card">
+        <div class="slide-tag">Introduction</div>
+        <div class="slide-title">What is Polymorphism?</div>
+        <p class="body-text">The word comes from Greek — <strong>poly</strong> (many) + <strong>morph</strong> (form).
+          In programming, it means <em>one interface, many implementations</em>.</p>
+        <div class="callout">
+          <strong>Core idea:</strong> The same method name can produce <strong>different behavior</strong> depending on
+          which object it is called on — without the caller needing to know what type that object is.
+        </div>
+        <p class="body-text">This is one of the four pillars of OOP alongside <strong>Encapsulation</strong>,
+          <strong>Abstraction</strong>, and <strong>Inheritance</strong>.</p>
+        <div class="analogy">
+          <span class="analogy-icon">🎵</span>
+          <div class="analogy-body">
+            <strong>Think of it this way:</strong> A music conductor waves the baton and says "play." Every musician
+            responds to that same cue — but a violinist plays strings while a drummer hits the kit. One instruction,
+            completely different execution.
+          </div>
+        </div>
+        <div class="callout">
+          <strong>Why does this matter?</strong> Without polymorphism, every new type forces you to rewrite existing
+          logic. With it, you extend the system by adding — not modifying.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 1: Two Types ── -->
+    <div class="slide" id="s1">
+      <div class="card">
+        <div class="slide-tag">Core Concepts</div>
+        <div class="slide-title">Two Types of Polymorphism</div>
+        <div class="two-col">
+          <div class="type-card tc-compile">
+            <div class="tc-tag">Compile Time</div>
+            <div class="tc-title">Static — Overloading</div>
+            <div class="tc-body">Same method name, different parameter types or count. The compiler picks the right
+              version before the program runs.</div>
+          </div>
+          <div class="type-card tc-runtime">
+            <div class="tc-tag">Runtime ← focus here</div>
+            <div class="tc-title">Dynamic — Overriding</div>
+            <div class="tc-body">A subclass replaces a parent's method. The correct version is chosen at runtime based
+              on the actual object type.</div>
+          </div>
+        </div>
+        <div class="callout">
+          In practice, when someone says "polymorphism" they mean the <strong>dynamic (runtime)</strong> variant — it is
+          what makes software truly extensible.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 2: Static Example ── -->
+    <div class="slide" id="s2">
+      <div class="card">
+        <div class="slide-tag">Example · Static</div>
+        <div class="slide-title">Method Overloading</div>
+        <p class="body-text">Same method name, different signatures. The compiler selects the correct version based on
+          what arguments you pass.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-dots"><span class="cd1"></span><span class="cd2"></span><span class="cd3"></span></div>
+            <span class="code-filename">Calculator.java</span>
+          </div>
+          <div class="code-body"><span class="kw">class</span> <span class="cls">Calculator</span> {
+
+            <span class="cm">// Two integers</span>
+            <span class="kw">int</span> <span class="fn">add</span>(<span class="kw">int</span> a, <span
+              class="kw">int</span> b) {
+            <span class="kw">return</span> a + b;
+            }
+
+            <span class="cm">// Three integers</span>
+            <span class="kw">int</span> <span class="fn">add</span>(<span class="kw">int</span> a, <span
+              class="kw">int</span> b, <span class="kw">int</span> c) {
+            <span class="kw">return</span> a + b + c;
+            }
+
+            <span class="cm">// Floating point</span>
+            <span class="kw">double</span> <span class="fn">add</span>(<span class="kw">double</span> a, <span
+              class="kw">double</span> b) {
+            <span class="kw">return</span> a + b;
+            }
+            }
+
+            calc.<span class="fn">add</span>(<span class="num">2</span>, <span class="num">3</span>) <span class="cm">//
+              → 5</span>
+            calc.<span class="fn">add</span>(<span class="num">1</span>, <span class="num">2</span>, <span
+              class="num">3</span>) <span class="cm">// → 6</span>
+            calc.<span class="fn">add</span>(<span class="num">1.5</span>, <span class="num">2.5</span>) <span
+              class="cm">// → 4.0</span>
+          </div>
+        </div>
+        <p class="body-text">The caller always writes <code>add()</code>. The compiler resolves which implementation to
+          use — no manual branching required.</p>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 3: Dynamic Example ── -->
+    <div class="slide" id="s3">
+      <div class="card">
+        <div class="slide-tag">Example · Dynamic</div>
+        <div class="slide-title">Method Overriding</div>
+        <p class="body-text">A parent class defines a method contract. Each subclass provides its own implementation.
+          The correct one runs at runtime based on the actual object type.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-dots"><span class="cd1"></span><span class="cd2"></span><span class="cd3"></span></div>
+            <span class="code-filename">Animal.java</span>
+          </div>
+          <div class="code-body"><span class="kw">class</span> <span class="cls">Animal</span> {
+            <span class="kw">String</span> <span class="fn">speak</span>() { <span class="kw">return</span> <span
+              class="str">"..."</span>; }
+            }
+
+            <span class="kw">class</span> <span class="cls">Dog</span> <span class="kw">extends</span> <span
+              class="cls">Animal</span> {
+            <span class="kw">String</span> <span class="fn">speak</span>() { <span class="kw">return</span> <span
+              class="str">"Woof"</span>; }
+            }
+
+            <span class="kw">class</span> <span class="cls">Cat</span> <span class="kw">extends</span> <span
+              class="cls">Animal</span> {
+            <span class="kw">String</span> <span class="fn">speak</span>() { <span class="kw">return</span> <span
+              class="str">"Meow"</span>; }
+            }
+
+            <span class="cm">// One loop — no type-checking needed</span>
+            <span class="cls">Animal</span>[] animals = { <span class="kw">new</span> <span class="cls">Dog</span>(),
+            <span class="kw">new</span> <span class="cls">Cat</span>(), <span class="kw">new</span> <span
+              class="cls">Dog</span>() };
+
+            <span class="kw">for</span> (<span class="cls">Animal</span> a : animals) {
+            <span class="cls">System</span>.<span class="fn">out</span>.println(a.<span class="fn">speak</span>());
+            }
+            <span class="cm">// Output: Woof Meow Woof</span>
+          </div>
+        </div>
+        <div class="callout">
+          Notice the loop does <strong>not</strong> check what type each animal is. It simply calls <code>speak()</code>
+          and the runtime dispatches to the right method automatically.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 4: Interactive Demo ── -->
+    <div class="slide" id="s4">
+      <div class="card">
+        <div class="slide-tag">Interactive Demo</div>
+        <div class="slide-title">Shapes and the <code>area()</code> Method</div>
+        <p class="body-text">Each shape class overrides <code>area()</code> with its own formula. Toggle shapes on or
+          off — the method call is always identical, only the object changes.</p>
+        <div class="demo-wrap">
+          <div class="demo-topbar">
+            <div class="demo-topbar-dot"></div>
+            <span>shape.area() — runtime output</span>
+          </div>
+          <div class="demo-inner">
+            <div
+              style="font-family:'DM Mono',monospace; font-size:13px; background:var(--accent-light); color:var(--accent); border-radius:8px; padding:9px 14px; margin-bottom:14px; letter-spacing:0.01em;">
+              The method call never changes: &nbsp;<strong>shape.area()</strong>
+            </div>
+            <div class="toggle-row">
+              <button class="toggle-btn on" onclick="toggleShape('circle', this)">Circle r=5</button>
+              <button class="toggle-btn on" onclick="toggleShape('rect', this)">Rectangle 4×6</button>
+              <button class="toggle-btn on" onclick="toggleShape('triangle', this)">Triangle b=8 h=3</button>
+              <button class="toggle-btn on" onclick="toggleShape('square', this)">Square s=7</button>
+            </div>
+            <div id="shape-output"></div>
+          </div>
+        </div>
+        <p class="body-text">Adding a new shape — say, <code>Pentagon</code> — requires <strong>zero changes</strong> to
+          the calling loop. This is runtime polymorphism enabling real-world scalability.</p>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 5: Where it's useful ── -->
+    <div class="slide" id="s5">
+      <div class="card">
+        <div class="slide-tag">Applications</div>
+        <div class="slide-title">Where Polymorphism Matters</div>
+        <p class="body-text">Polymorphism pays off most when you need to <strong>extend a system without modifying
+            existing code</strong> — a principle known as the Open/Closed Principle.</p>
+        <div class="example-grid">
+          <div class="eg-card">
+            <span class="eg-icon">🎮</span>
+            <div class="eg-title">Game Engines</div>
+            <div class="eg-desc">A game loop calls <code>update()</code> and <code>draw()</code> on every entity.
+              Enemies, players, and particles each behave differently — no branching needed.</div>
+          </div>
+          <div class="eg-card">
+            <span class="eg-icon">💳</span>
+            <div class="eg-title">Payment Systems</div>
+            <div class="eg-desc"><code>payment.process()</code> works for Credit Card, PayPal, or Crypto. New providers
+              integrate without touching the checkout logic.</div>
+          </div>
+          <div class="eg-card">
+            <span class="eg-icon">📄</span>
+            <div class="eg-title">File Exporters</div>
+            <div class="eg-desc"><code>exporter.export(data)</code> produces PDF, CSV, or Excel. Each format is its own
+              class — the report generator never changes.</div>
+          </div>
+          <div class="eg-card">
+            <span class="eg-icon">🧩</span>
+            <div class="eg-title">UI Frameworks</div>
+            <div class="eg-desc">Every widget — Button, Input, Modal — extends a base <code>Component</code> with its
+              own <code>render()</code>. The framework renders all of them uniformly.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 6: Quiz ── -->
+    <div class="slide" id="s6">
+      <div class="card">
+        <div class="slide-tag">Knowledge Check</div>
+        <div class="slide-title">Three Quick Questions</div>
+        <p class="body-text">No pressure — this is to reinforce what you just learned.</p>
+
+        <!-- Q1 -->
+        <div class="quiz-question">1. You have a list of <code>Shape</code> objects and call <code>shape.area()</code>
+          in a loop. Each shape uses its own formula at runtime. What type of polymorphism is this?</div>
+        <div class="quiz-options">
+          <button class="q-btn" onclick="ans(this,'q1',false)">Static polymorphism — method overloading</button>
+          <button class="q-btn" onclick="ans(this,'q1',true)">Dynamic polymorphism — method overriding</button>
+          <button class="q-btn" onclick="ans(this,'q1',false)">Encapsulation</button>
+        </div>
+        <div class="quiz-feedback" id="q1-fb"></div>
+
+        <div class="q-sep"></div>
+
+        <!-- Q2 -->
+        <div class="quiz-question">2. A class defines <code>add(int a, int b)</code> and also
+          <code>add(double a, double b)</code>. Which concept does this demonstrate?</div>
+        <div class="quiz-options">
+          <button class="q-btn" onclick="ans(this,'q2',true)">Static polymorphism — overloading</button>
+          <button class="q-btn" onclick="ans(this,'q2',false)">Dynamic polymorphism — overriding</button>
+          <button class="q-btn" onclick="ans(this,'q2',false)">Abstraction</button>
+        </div>
+        <div class="quiz-feedback" id="q2-fb"></div>
+
+        <div class="q-sep"></div>
+
+        <!-- Q3 -->
+        <div class="quiz-question">3. Which benefit does polymorphism provide when adding a new payment method to an
+          existing checkout system?</div>
+        <div class="quiz-options">
+          <button class="q-btn" onclick="ans(this,'q3',false)">The entire checkout class must be rewritten</button>
+          <button class="q-btn" onclick="ans(this,'q3',true)">The new class slots in without modifying existing checkout
+            logic</button>
+          <button class="q-btn" onclick="ans(this,'q3',false)">The program runs faster at compile time</button>
+        </div>
+        <div class="quiz-feedback" id="q3-fb"></div>
+      </div>
+
+      <div class="summary-box">
+        <h3>Key Takeaways</h3>
+        <div class="summary-item">Polymorphism = one interface, many implementations</div>
+        <div class="summary-item">Static (overloading) is resolved at compile time; dynamic (overriding) at runtime
+        </div>
+        <div class="summary-item">It enables you to write code against a parent type today that works with any future
+          subtype automatically</div>
+        <div class="summary-item">The Open/Closed Principle: open for extension, closed for modification</div>
+      </div>
+    </div>
+
+    <!-- NAV -->
+    <div class="nav">
+      <span class="nav-info" id="nav-info">1 / 7</span>
+      <div class="nav-btns">
+        <button class="nav-btn" id="prev-btn" onclick="go(-1)" disabled>← Back</button>
+        <button class="nav-btn primary" id="next-btn" onclick="go(1)">Next →</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const TOTAL = 7;
+    let cur = 0;
+
+    const shapes = {
+      circle: { label: 'Circle (r = 5)', formula: 'π × r²', result: (Math.PI * 25).toFixed(2) },
+      rect: { label: 'Rectangle (4 × 6)', formula: 'w × h', result: '24.00' },
+      triangle: { label: 'Triangle (b=8, h=3)', formula: '½ × b × h', result: '12.00' },
+      square: { label: 'Square (s = 7)', formula: 's²', result: '49.00' },
+    };
+    let active = new Set(Object.keys(shapes));
+
+    function renderOutput() {
+      const el = document.getElementById('shape-output');
+      if (!el) return;
+      if (!active.size) {
+        el.innerHTML = '<div class="empty-state">Select a shape above to see runtime output</div>';
+        return;
+      }
+      let rows = '<table class="output-table"><thead><tr><th>Class</th><th>Method called</th><th>Formula</th><th>Result</th></tr></thead><tbody>';
+      for (const k of ['circle', 'rect', 'triangle', 'square']) {
+        if (!active.has(k)) continue;
+        const s = shapes[k];
+        rows += `<tr>
+      <td>${s.label}</td>
+      <td><span class="formula">shape.area()</span></td>
+      <td><span class="formula">${s.formula}</span></td>
+      <td><span class="result">${s.result}</span></td>
+    </tr>`;
+      }
+      rows += '</tbody></table>';
+      el.innerHTML = rows;
+    }
+
+    function toggleShape(key, btn) {
+      if (active.has(key)) { active.delete(key); btn.classList.remove('on'); }
+      else { active.add(key); btn.classList.add('on'); }
+      renderOutput();
+    }
+
+    function renderDots() {
+      const wrap = document.getElementById('dots');
+      wrap.innerHTML = '';
+      for (let i = 0; i < TOTAL; i++) {
+        const d = document.createElement('div');
+        d.className = 'dot' + (i === cur ? ' active' : i < cur ? ' done' : '');
+        d.onclick = () => { cur = i - 1; go(1); };
+        wrap.appendChild(d);
+      }
+    }
+
+    function renderProgress() {
+      const pct = Math.round(((cur + 1) / TOTAL) * 100);
+      document.getElementById('prog-fill').style.width = pct + '%';
+      document.getElementById('prog-pct').textContent = pct + '%';
+      document.getElementById('prog-label').textContent = 'Section ' + (cur + 1) + ' of ' + TOTAL;
+      document.getElementById('nav-info').textContent = (cur + 1) + ' / ' + TOTAL;
+    }
+
+    function go(dir) {
+      document.getElementById('s' + cur).classList.remove('visible');
+      cur = Math.max(0, Math.min(TOTAL - 1, cur + dir));
+      document.getElementById('s' + cur).classList.add('visible');
+      document.getElementById('prev-btn').disabled = cur === 0;
+      const nb = document.getElementById('next-btn');
+      if (cur === TOTAL - 1) { nb.disabled = true; nb.textContent = 'Complete'; }
+      else { nb.disabled = false; nb.textContent = 'Next →'; }
+      renderProgress();
+      renderDots();
+      if (cur === 4) setTimeout(renderOutput, 30);
+    }
+
+    const answers = {
+      q1: 'Dynamic polymorphism — method overriding',
+      q2: 'Static polymorphism — overloading',
+      q3: 'The new class slots in without modifying existing checkout logic',
+    };
+    const feedbacks = {
+      q1: { good: 'Correct. The method resolved at runtime based on the actual object type is dynamic (override) polymorphism.', bad: 'Not quite. Because the behavior is determined at runtime from the actual object type, this is dynamic polymorphism via method overriding.' },
+      q2: { good: 'Correct. Same name, different parameter types, resolved at compile time — that is method overloading.', bad: 'Not quite. Two methods with the same name but different signatures is method overloading — static polymorphism.' },
+      q3: { good: 'Correct. That is the Open/Closed Principle enabled by polymorphism — extend without modifying existing code.', bad: 'Not quite. Polymorphism lets new subclasses plug in without changing the calling code at all.' },
+    };
+
+    function ans(btn, qid, correct) {
+      const group = btn.closest('.card') || btn.parentElement.parentElement;
+      btn.parentElement.querySelectorAll('.q-btn').forEach(b => {
+        b.disabled = true;
+        if (b.textContent.trim() === answers[qid]) b.classList.add('correct');
+      });
+      if (!correct) btn.classList.add('wrong');
+      const fb = document.getElementById(qid + '-fb');
+      fb.textContent = correct ? '✓ ' + feedbacks[qid].good : '✗ ' + feedbacks[qid].bad;
+      fb.className = 'quiz-feedback show ' + (correct ? 'good' : 'bad');
+    }
+
+    renderProgress();
+    renderDots();
+  </script>
+</body>
+
+</html>
